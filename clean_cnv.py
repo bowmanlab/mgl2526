@@ -15,7 +15,6 @@ import glob
 import seawater
 import itertools
 from datetime import datetime
-from datetime import timezone
 from zoneinfo import ZoneInfo
 
 bl_names = ['bottle', 'bottle_2', 'date.time', 'index_start', 'index_stop']
