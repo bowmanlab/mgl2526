@@ -37,3 +37,20 @@ lm.example <- lm(cast.data$sbox0Mm.Kg..Oxygen..SBE.43..umol.kg.[select] ~ cast.d
 abline(lm.example)
 
 summary(lm.example)
+
+## let's get a little fancier and load all of the casts so we can call them as needed
+
+all.casts <- list()
+
+csv.list <- list.files(path = data.directory,
+                     pattern = '*clean.csv',
+                     ignore.case = F)
+
+for(f in csv.list){
+  temp <- read.csv(paste0(data.directory, select.cast, '_clean.csv'))
+  all.casts[f] <- temp
+}
+
+## now all the files are stored as objects in the list all.casts and can be called by name.  You can call one like:
+
+working.cast <- all.casts$`20250619_1_clean.csv`
