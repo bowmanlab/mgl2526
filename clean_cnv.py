@@ -88,6 +88,7 @@ for f in files:
         cnv_in = pd.read_csv(cnv_input_dir + f, header = None, sep = r'\s+', names = var_names, index_col = False, skiprows = skip)
         name = f.split('.cnv')[0]
         bl_in = pd.read_csv(bl_input_dir + name + '.bl', header = None, skiprows = 2, index_col = 0, names = bl_names)
+        temp_bl_out = pd.DataFrame()
         
         ## parse the header file 
         
@@ -159,19 +160,22 @@ for f in files:
         ## get bottle depth
         
         for bl in bl_in.index:
+            bl_identifier = name + '_' + str(bl)
+            
             start = bl_in.loc[bl, 'index_start']
             stop = bl_in.loc[bl, 'index_stop']
             z = cnv_in.loc[start:stop, 'depSM: Depth [salt water, m]'].mean().round(4) # depth
             z_i = abs(cnv_downcast['depSM: Depth [salt water, m]'] - z).idxmin()
-            bl_out.loc[bl, 'depSM: Depth [salt water, m]'] = z
-            bl_out.loc[bl, 'downcast_index'] = z_i
+            temp_bl_out.loc[bl_identifier, 'cast'] = name
+            temp_bl_out.loc[bl_identifier, 'depSM: Depth [salt water, m]'] = z
+            temp_bl_out.loc[bl_identifier, 'downcast_index'] = z_i
             
             ## populate bottle file
             
-            bl_out.loc[bl, 'downcast_index'] = z_i
+            temp_bl_out.loc[bl_identifier, 'downcast_index'] = z_i
             
             for param in cnv_downcast.columns:
-                bl_out.loc[bl, param] = cnv_downcast.loc[z_i, param]
+                temp_bl_out.loc[bl_identifier, param] = cnv_downcast.loc[z_i, param]
 
         ## write out files
             
@@ -206,9 +210,9 @@ for f in files:
                                'comp_depth_[m]':'k'}
                 
                 try:
-                    plt.plot(bl_out[param], bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
+                    plt.plot(temp_bl_out[param], temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
                 except KeyError:
-                    plt.plot(0, bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
+                    plt.plot(0, temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
                     
                 for special_param in line_colors.keys():
                     special_param_z = cast_out.loc[name, special_param]
@@ -237,7 +241,7 @@ for f in files:
                 plt.title(name)
                 
                 plt.plot([0] * 24,
-                         bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
+                         temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
                 
                 for special_param in line_colors.keys():
                     special_param_z = cast_out.loc[name, special_param]
@@ -251,6 +255,8 @@ for f in files:
                     
                 pdf.savefig()
                 plt.close()
+                
+bl_out = pd.concat([bl_out, temp_bl_out])
                 
 bl_out.to_csv('Z://public//CTD//mgl2506_bottles.csv')
 cast_out.to_csv('Z://public//CTD//mgl2506_castmetadata.csv')
