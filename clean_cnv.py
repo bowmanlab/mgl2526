@@ -16,6 +16,7 @@ import seawater
 import itertools
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import numpy as np
 
 bl_names = ['bottle', 'bottle_2', 'date.time', 'index_start', 'index_stop']
 
@@ -144,11 +145,15 @@ for f in files:
         cmax = cnv_downcast['depSM: Depth [salt water, m]'][cnv_downcast['flECO-AFL: Fluorescence, WET Labs ECO-AFL/FL [mg/m^3]'].idxmax()]
         maxc = cnv_downcast['flECO-AFL: Fluorescence, WET Labs ECO-AFL/FL [mg/m^3]'].max()
         
-        ## find compensation depth (1 % light level)
+        ## find compensation depth (1 % light level), daytime casts only
         
-        temp_delta = abs(cnv_downcast['irradiance%'] - 1)
-        temp_i = temp_delta.idxmin()
-        comp_depth = cnv_downcast['depSM: Depth [salt water, m]'][temp_i]
+        if cnv_downcast['par: PAR/Irradiance, Biospherical/Licor'].max() > 400:
+        
+            temp_delta = abs(cnv_downcast['irradiance%'] - 1)
+            temp_i = temp_delta.idxmin()
+            comp_depth = cnv_downcast['depSM: Depth [salt water, m]'][temp_i]
+        else:
+            comp_depth = np.nan
 
         ## add cmax, mld, maxc, and compensation depth to cast_out
         
