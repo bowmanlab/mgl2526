@@ -38,6 +38,12 @@ abline(lm.example)
 
 summary(lm.example)
 
+## let's see how much the two oxygen sensors disagree
+
+plot(cast.data$sbox0Mm.Kg..Oxygen..SBE.43..umol.kg.-cast.data$sbox1Mm.Kg..Oxygen..SBE.43..2..umol.kg.,
+     type = 'h',
+     ylab = 'deltaO2')
+
 #### cast metadata exploration ####
 
 plot(ctd.metadata$cmax_.m. ~ ctd.metadata$comp_depth_.m.) # nice correlation, one outlier
