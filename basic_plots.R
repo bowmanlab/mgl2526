@@ -40,7 +40,13 @@ summary(lm.example)
 
 #### cast metadata exploration ####
 
-plot(ctd.metadata$cmax_.m. ~ ctd.metadata$comp_depth_.m.)
+plot(ctd.metadata$cmax_.m. ~ ctd.metadata$comp_depth_.m.) # nice correlation, one outlier
+
+ctd.metadata[which.min(ctd.metadata$cmax_.m.),] # identify the outlier, might be interesting
+
+plot(ctd.metadata$maxc_.mg.m.3. ~ ctd.metadata$comp_depth_.m.) # nice correlation!
+
+plot(ctd.metadata$maxc_.mg.m.3. ~ ctd.metadata$ml_depth_.m.) # messy, could be multiple relationships
 
 #### all casts ####
 
