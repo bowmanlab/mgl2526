@@ -38,6 +38,12 @@ abline(lm.example)
 
 summary(lm.example)
 
+#### cast metadata exploration ####
+
+plot(ctd.metadata$cmax_.m. ~ ctd.metadata$comp_depth_.m.)
+
+#### all casts ####
+
 ## let's get a little fancier and load all of the casts so we can call them as needed
 
 all.casts <- list()
