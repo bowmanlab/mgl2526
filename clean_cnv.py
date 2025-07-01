@@ -214,14 +214,23 @@ for f in files:
                                'cmax_[m]':'g',
                                'comp_depth_[m]':'k'}
                 
+                ## plot where bottles were fired
+                
                 try:
                     plt.plot(temp_bl_out[param], temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
                 except KeyError:
                     plt.plot(0, temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
                     
+                ## add indicators for mld, cmax, compensation depth
+                
+                ## figure out reasonable x-axis limits first
+                
+                x_max = plt.xlim()[0]
+                x_min = plt.xlim()[1]
+                    
                 for special_param in line_colors.keys():
                     special_param_z = cast_out.loc[name, special_param]
-                    plt.plot([0, max(cnv_downcast[param])], [special_param_z, special_param_z],
+                    plt.plot([x_min, x_max], [special_param_z, special_param_z],
                              color = line_colors[special_param],
                              linestyle = 'dashed')
                     
@@ -235,6 +244,8 @@ for f in files:
 
                 pdf.savefig()
                 plt.close()
+                
+            ## plot parameters based on 2 m bins
                     
             for param in ['n2']:
                 
@@ -245,12 +256,19 @@ for f in files:
                 ax.set_ylabel('depSM: Depth [salt water, m]')
                 plt.title(name)
                 
+                ## plot where bottles were fired
+                
                 plt.plot([0] * 24,
                          temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
                 
+                ## figure out reasonable x-axis limits first
+                
+                x_max = plt.xlim()[0]
+                x_min = plt.xlim()[1]
+                
                 for special_param in line_colors.keys():
                     special_param_z = cast_out.loc[name, special_param]
-                    plt.plot([0, max(bvf[param])], [special_param_z, special_param_z],
+                    plt.plot([x_min, x_max], [special_param_z, special_param_z],
                              color = line_colors[special_param],
                              linestyle = 'dashed')
                     
