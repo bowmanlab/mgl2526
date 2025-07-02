@@ -12,8 +12,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import colormaps
 from matplotlib import lines
 import glob
-import seawater
-import itertools
+import gsw
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import numpy as np
@@ -26,6 +25,7 @@ bl_input_dir = "Z://public//CTD//raw_CTD//"
 all_T = []
 all_S = []
 all_rho = []
+all_chl = []
 
 bl_out = pd.DataFrame()
 cast_out = pd.DataFrame()
@@ -111,8 +111,14 @@ for f in files:
         
         s = cnv_downcast['sal00: Salinity, Practical [PSU]']
         t = cnv_downcast['t090C: Temperature [ITS-90, deg C]']
-        p = cnv_downcast['depSM: Depth [salt water, m]']
-        cnv_downcast['rho [kg/m^3]'] = seawater.eos80.dens(s, t, p)
+        p = cnv_downcast['prDM: Pressure, Digiquartz [db]']
+        lat = 33
+        lon = -122
+        SA = gsw.SA_from_SP(s, p, lon, lat) # absolute salinity, using approximate lon, lat
+        CT = gsw.CT_from_t(s, t, p) # conservative temperature
+        cnv_downcast['rho [kg/m^3]'] = gsw.density.rho(SA, CT, p)
+        cnv_downcast['CT'] = CT
+        cnv_downcast['SA'] = SA
         
         ## % irradiance
         
@@ -120,24 +126,23 @@ for f in files:
         
         ## bin data by 2bdar
         
-        cnv_downcast['bin'] = pd.cut(cnv_downcast['depSM: Depth [salt water, m]'], bins=300)
+        nbins = cnv_downcast['depSM: Depth [salt water, m]'].max()/2
+        nbins = round(nbins)
+        cnv_downcast['bin'] = pd.cut(cnv_downcast['depSM: Depth [salt water, m]'], bins = nbins)
         cnv_binned = cnv_downcast.groupby('bin', observed = True).mean()
-        
-        s_binned = cnv_binned['sal00: Salinity, Practical [PSU]']
-        t_binned = cnv_binned['t090C: Temperature [ITS-90, deg C]']
-        p_binned = cnv_binned['depSM: Depth [salt water, m]']
-            
+                    
         ## calculate buoyancy frequency and find MLD
                 
         all_T = all_T + list(t)
         all_S = all_S + list(s)
         all_rho = all_rho + list(cnv_downcast['rho [kg/m^3]'])
+        all_chl = all_chl + list(cnv_downcast['flECO-AFL: Fluorescence, WET Labs ECO-AFL/FL [mg/m^3]'])
         
-        n2, q, p_ave = seawater.geostrophic.bfrq(s_binned, t_binned, p_binned)
-        n2_flat = list(itertools.chain.from_iterable(n2))
-        q_flat = list(itertools.chain.from_iterable(q))
-        p_flat = list(itertools.chain.from_iterable(p_ave))
-        bvf = pd.DataFrame(zip(p_flat, n2_flat, q_flat), columns = ['p', 'n2', 'q'])
+        
+        n2, p_ave = gsw.Nsquared(cnv_binned['SA'], cnv_binned['CT'], cnv_binned['prDM: Pressure, Digiquartz [db]'], lat)
+        n2_flat = list(n2)
+        p_flat = list(p_ave)
+        bvf = pd.DataFrame(zip(p_flat, n2_flat), columns = ['p', 'n2'])
         ml_depth = bvf['p'][bvf.n2.idxmax()]
         
         ## find cmax and max c
