@@ -62,7 +62,7 @@ def parse_header_file(directory, name):
                 line = line.split()
                 deg_lon = line[4]
                 min_lon = line[5]
-                ddeg_lon = round(float(deg_lon) + float(min_lon)/60, 5)     
+                ddeg_lon = round(float(deg_lon) + float(min_lon)/60, 5)  * -1 # important!   
             elif 'NMEA UTC (Time)' in line:
                 line = line.split(' = ')[1]
                 line = line + ' +0000'
