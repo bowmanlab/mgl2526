@@ -150,6 +150,10 @@ for f in files:
         cmax = cnv_downcast['depSM: Depth [salt water, m]'][cnv_downcast['flECO-AFL: Fluorescence, WET Labs ECO-AFL/FL [mg/m^3]'].idxmax()]
         maxc = cnv_downcast['flECO-AFL: Fluorescence, WET Labs ECO-AFL/FL [mg/m^3]'].max()
         
+        ## find the 1026 isopycnal, as an indicator of heave
+        
+        z_1026 = cnv_downcast['depSM: Depth [salt water, m]'][abs(cnv_downcast['rho [kg/m^3]'] - 1026).idxmin()]
+        
         ## find compensation depth (1 % light level), daytime casts only
         
         if cnv_downcast['par: PAR/Irradiance, Biospherical/Licor'].max() > 400:
@@ -166,6 +170,7 @@ for f in files:
         cast_out.loc[name, 'cmax_[m]'] = cmax
         cast_out.loc[name, 'maxc_[mg/m^3]'] = maxc
         cast_out.loc[name, 'comp_depth_[m]'] = comp_depth
+        cast_out.loc[name, 'z_1026_[m]'] = z_1026
         
         ## get bottle depth
         
@@ -217,7 +222,8 @@ for f in files:
                 
                 line_colors = {'ml_depth_[m]':'b' ,
                                'cmax_[m]':'g',
-                               'comp_depth_[m]':'k'}
+                               'comp_depth_[m]':'k',
+                               'z_1026_[m]':'r'}
                 
                 ## plot where bottles were fired
                 
@@ -241,10 +247,11 @@ for f in files:
                     
                 legend_lines = [lines.Line2D([0], [0], color = 'b', linestyle = 'dashed'),
                                 lines.Line2D([0], [0], color = 'g', linestyle = 'dashed'),
-                                lines.Line2D([0], [0], color = 'k', linestyle = 'dashed')]
+                                lines.Line2D([0], [0], color = 'k', linestyle = 'dashed'),
+                                lines.Line2D([0], [0], color = 'r', linestyle = 'dashed')]
                     
                 ax.legend(legend_lines,
-                          ['ml_depth_[m]', 'cmax_[m]', 'comp_depth_[m]'],
+                          list(line_colors.keys()),
                           loc = 'lower right')
 
                 pdf.savefig()
@@ -277,9 +284,9 @@ for f in files:
                              color = line_colors[special_param],
                              linestyle = 'dashed')
                     
-                    ax.legend(legend_lines,
-                              ['ml_depth_[m]', 'cmax_[m]', 'comp_depth_[m]'],
-                              loc = 'lower right')
+                ax.legend(legend_lines,
+                          list(line_colors.keys()),
+                          loc = 'lower right')
                     
                 pdf.savefig()
                 plt.close()
@@ -295,7 +302,7 @@ with PdfPages('Z://public//CTD//all_TS_plots.pdf') as pdf:
 
     viridis = colormaps['viridis'].resampled(100)
     fig, ax = plt.subplots(figsize = (8.5, 8.5))
-    ts_scatter = plt.scatter(all_S, all_T, c = all_rho, cmap = 'viridis')
+    ts_scatter = plt.scatter(all_S, all_T, c = all_chl, cmap = 'viridis')
     ax.set_xlabel('S')
     ax.set_ylabel('T')
     cbar = plt.colorbar(ts_scatter)

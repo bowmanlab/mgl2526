@@ -38,6 +38,14 @@ abline(lm.example)
 
 summary(lm.example)
 
+## check out new parameter z_1026
+
+plot(ctd.metadata$z_1026_.m.,
+     ylab = '1026 isopycnal (m)',
+     xlab = 'Cast')
+
+hist(ctd.metadata$z_1026_.m.)
+
 ## let's see how much the two oxygen sensors disagree
 
 plot(cast.data$sbox0Mm.Kg..Oxygen..SBE.43..umol.kg.-cast.data$sbox1Mm.Kg..Oxygen..SBE.43..2..umol.kg.,
@@ -46,9 +54,15 @@ plot(cast.data$sbox0Mm.Kg..Oxygen..SBE.43..umol.kg.-cast.data$sbox1Mm.Kg..Oxygen
 
 #### cast metadata exploration ####
 
-plot(ctd.metadata$cmax_.m. ~ ctd.metadata$comp_depth_.m.) # nice correlation, one outlier
+plot(ctd.metadata$cmax_.m. ~ ctd.metadata$comp_depth_.m.,
+     ylab = 'Chlorophyll max (m)',
+     xlab = '1 % light level (m)') # nice correlation, one outlier
 
-ctd.metadata[which.min(ctd.metadata$cmax_.m.),] # identify the outlier, might be interesting
+abline(0, 1, lty = 2)
+
+abline(lm(ctd.metadata$cmax_.m. ~ ctd.metadata$comp_depth_.m.))
+
+ctd.metadata[order(ctd.metadata$cmax_.m., decreasing = T),] # identify the outlier, might be interesting
 
 plot(ctd.metadata$maxc_.mg.m.3. ~ ctd.metadata$comp_depth_.m.) # nice correlation!
 
