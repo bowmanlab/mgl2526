@@ -70,11 +70,14 @@ def parse_header_file(directory, name):
                 time_local = time_utc.astimezone(ZoneInfo("America/Los_Angeles"))
                 time_utc_out = datetime.strftime(time_utc, '%Y-%m-%d %H:%M:%S %z')
                 time_local_out = datetime.strftime(time_local, '%Y-%m-%d %H:%M:%S %z')
+            elif 'Station' in line:
+                station = line.split('Station: ')[1]
                 
     header_out = {'lat':ddeg_lat,
                   'lon':ddeg_lon,
                   'time_utc': time_utc_out,
-                  'time_local_out': time_local_out}
+                  'time_local_out': time_local_out,
+                  'station': station}
             
     return(header_out)
 
@@ -225,12 +228,14 @@ for f in files:
                                'comp_depth_[m]':'k',
                                'z_1026_[m]':'r'}
                 
-                ## plot where bottles were fired
+                ## plot where bottles were fired, if statement in case no bottles fired
                 
-                try:
-                    plt.plot(temp_bl_out[param], temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
-                except KeyError:
-                    plt.plot(0, temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
+                if temp_bl_out.shape[0] > 0:
+                
+                    try:
+                        plt.plot(temp_bl_out[param], temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
+                    except KeyError:
+                        plt.plot(0, temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
                     
                 ## add indicators for mld, cmax, compensation depth
                 
@@ -269,10 +274,14 @@ for f in files:
                 plt.title(name)
                 
                 ## plot where bottles were fired
+
+                ## plot where bottles were fired, if statement in case no bottles fired
                 
-                plt.plot([0] * 24,
-                         temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
+                if temp_bl_out.shape[0] > 0:
                 
+                    plt.plot([0] * 24,
+                             temp_bl_out['depSM: Depth [salt water, m]'], 'ro', markersize = 8)
+                    
                 ## figure out reasonable x-axis limits first
                 
                 x_max = plt.xlim()[0]
@@ -306,7 +315,7 @@ with PdfPages('Z://public//CTD//all_TS_plots.pdf') as pdf:
     ax.set_xlabel('S')
     ax.set_ylabel('T')
     cbar = plt.colorbar(ts_scatter)
-    cbar.set_label(rotation = 270, label = 'rho')
+    cbar.set_label(rotation = 270, label = 'Chl')
     #plt.show()
     pdf.savefig()
     plt.close()
