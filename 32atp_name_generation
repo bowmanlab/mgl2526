@@ -1,0 +1,45 @@
+library(readxl)
+library(dplyr)
+
+
+#The name of the game is name generation: function to generate ATP sample names!
+#this is your function--activate !
+generate_atp_samples <- function(date, cast_number) {
+  expand_13 <- function(x) { #becasue we do replicates at 13
+    sapply(x, function(val) {
+      if (val == 13) {
+        return(paste0("13", letters[1:4]))
+      } else {
+        return(as.character(val))
+      }
+    }) |> unlist()
+  }
+  
+  # Define sample numbers; go by 2 starting at 7 or 1 until 23
+  light_numbers <- seq(7, 23, 2)
+  dark_numbers  <- seq(1, 23, 2)
+  
+  light_samples <- expand_13(light_numbers)
+  dark_samples  <- expand_13(dark_numbers)
+  
+  # Construct the formatted names-- we could cut the cast bit of folks dont like it
+  light_names <- paste0(date, "_cast", cast_number, "_atp-L_", light_samples)
+  dark_names  <- paste0(date, "_cast", cast_number, "_atp-D_", dark_samples)
+  
+  sample_names_df <- data.frame(
+    Sample_Name = c(light_names, dark_names),
+    stringsAsFactors = FALSE
+  )
+  
+  return(sample_names_df)
+}
+
+# Example usage:
+# You can modify the date and cast number here
+date_input <- "20250627"     # format: yyyymmdd
+cast_number <- 17            # integer only
+
+# Generate and print sample names
+samples <- generate_atp_samples(date_input, cast_number)
+print(samples)
+View(samples)
