@@ -16,6 +16,7 @@ import gsw
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import numpy as np
+import subprocess
 
 bl_names = ['bottle', 'bottle_2', 'date.time', 'index_start', 'index_stop']
 
@@ -319,5 +320,10 @@ with PdfPages('Z://public//CTD//all_TS_plots.pdf') as pdf:
     #plt.show()
     pdf.savefig()
     plt.close()
+    
+## execute R script with spatial plots
+
+spatial_plots = subprocess.run('Rscript.exe spatial_plots.r', shell = True, capture_output = True)
+
                     
             
